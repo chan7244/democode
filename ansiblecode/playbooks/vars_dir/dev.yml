@@ -1,0 +1,17 @@
+profile_name: 'dev'
+subnets: 'default_subnet'
+env_region: 'us-east-1'
+security_gruop_ids: 'sg-5930073d'
+security_group: 'default-sg'
+machine_type: 'rhel6'
+linux_ami: 'ami-default'
+keypair: 'ansible_deployed'
+instance-type: 'm3.large'
+owner_eid: '{{ ansible_env.USER }}'
+vpc:
+		id: vpc-fd8bf598
+		name: 'Default VPC'
+		subnet:
+		id: defualt-subnet
+
+dev_file_stuff: 'Variable from dev.yml'		

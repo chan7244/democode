@@ -1,0 +1,9 @@
+-hosts: localhost
+remote_user: ec2-user
+gather_facts: yes
+sudo: yes
+vars_files:
+- ./vars_dir/dev.yml
+
+roles:
+ -role: ldap-setup

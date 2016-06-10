@@ -1,0 +1,63 @@
+-name: Install auth-related packages
+apt:
+   name: '{{ item }}'
+   state: 'latest' 
+   install_recommends: false
+   with_items: '{{ auth_pakages }}'
+
+   include: ldap.yml
+   when: "'ldap' in auth_capabilities"
+
+   -name: Configure nsswitch
+  template:
+    src: 'etc/nsswitch.conf.j2'
+    dest: '/etc/nsswitch.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+    -name: Create common system groups
+	group:
+   name: '{{ item }}'
+   system: true
+   state: 'present' 
+   with_items: '{{ auth_system_groups }}'
+   when : auth_system_groups is defined and auth_system_groups
+
+   name: add group "techops_dba"
+   group: name=techops_dba
+   sudo: true
+
+   -name: Configure security access
+  template:
+    src: 'etc/security/access.conf.j2'
+    dest: '/etc/security/access.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+	-name: Configure PAM
+  template:
+    src: 'etc/pam.d/{{ item }}.j2'
+    dest: '/etc/pam.d/{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    with_items:
+    	-'common-account'
+    	-'common-auth'
+    	-'common-password'
+    	-'common-session'
+    	-'common-session-noninteractive'
+    	-'login'
+    	-'sshd'
+
+-name: Configure pam_cracklib
+  template:
+    src: 'usr/share/pam-configs/cracklib.j2'
+    dest: '/usr/share/pam-configs/cracklib'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    notify: [ 'Update PAM common configuration' ]
+    when: auth_cracklib is defined and auth_cracklib

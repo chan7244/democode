@@ -1,0 +1,53 @@
+---
+
+ -name: Install idap-related packages
+ apt:
+ 	name: '{{ item }}'
+ 	state: 'latest'
+ 	install_recommends: false
+ 	with_items: [ 'nslcd', 'libpam-ldap', 'ldap-utils', 'libnss-ldap' ]
+
+  -name: Configure ldap
+  template:
+    src: 'etc/ldap/ldap.conf.j2'
+    dest: '/etc/ldap/ldap.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+
+    -name: Configure nslcd
+  template:
+    src: 'etc/nslcd.conf.j2'
+    dest: '/etc/nslcd.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0640'
+    notify: [ 'Restart nslcd' ]
+
+    -name: Configure PAM LDAP configs
+  template:
+    src: 'etc/{{ item }}.j2'
+    dest: '/etc/{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+    with_items: 
+    - 'pam_ldap.conf'
+    - 'libnss-ldap.conf'
+
+    -name: Configure PAM LDAP configs
+  template:
+    src: 'etc/{{ item }}.j2'
+    dest: '/etc/{{ item }}'
+    owner: 'root'
+    group: 'root'
+    mode: '0600'
+    with_items: 
+    - 'pam_ldap.secret'
+    - 'libnss-ldap.secret'
+
+    -name: Restart nslcd
+    service:
+        name: 'nslcd'
+        state: 'restarted' 
+        chamged_when: false
